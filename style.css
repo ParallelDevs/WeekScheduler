@@ -22,6 +22,12 @@
 
 .schedule-rows td[data-disabled] { opacity: 0.55; }
 
+.time-slot[data-blocked="true"]{
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
+}
+
 .week-selector{
   text-align: center;
   height: 60px;

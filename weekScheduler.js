@@ -13,6 +13,7 @@
 
   WeekScheduler.DEFAULTS = {
     days: [0, 1, 2, 3, 4, 5, 6],  // Sun - Sat
+    blokedDays: [],
     startTime: '08:00',                // HH:mm format
     endTime: '20:00',                // HH:mm format
     interval: 30,                     // minutes
@@ -80,6 +81,7 @@
     var start = this.options.startTime,
       end = this.options.endTime,
       interval = this.options.interval,
+      blokedDays = this.options.blokedDays,
       days = this.options.days,
       $el = this.$el.find('.schedule-rows'),
       firstDayWeek = this.firstDayWeek;
@@ -91,8 +93,9 @@
         hour = hour.split(":");
         var dateAux = new Date(firstDayWeek.getTime() + i * 24 * 60 * 60 * 1000);
         var date = new Date(dateAux.getFullYear(), dateAux.getMonth(), dateAux.getDate(), hour[0], hour[1], 0, 0);
+        var blocked = jQuery.inArray(i, blokedDays) == -1 ? false : true;
 
-        return '<td class="time-slot" data-timestamp="' + date.getTime() + '"></td>'
+        return '<td class="time-slot" data-blocked="' + blocked + '" data-timestamp="' + date.getTime() + '"></td>'
       }).join();
 
       $el.append('<tr><td class="time-label">' + hmmAmPm(d) + '</td>' + daysInARow + '</tr>');
@@ -149,18 +152,18 @@
    * @public
    */
   WeekScheduler.prototype.updateTimeslot = function (arrow) {
-    this.$el.find(".time-slot").each(function( index ) {
+    this.$el.find(".time-slot").each(function (index) {
 
-      var timestamp = parseInt($( this ).data("timestamp"));
+      var timestamp = parseInt($(this).data("timestamp"));
 
-      if(arrow === "left"){
+      if (arrow === "left") {
         timestamp -= 7 * 24 * 60 * 60 * 1000
-      }else{
+      } else {
         timestamp += 7 * 24 * 60 * 60 * 1000
       }
 
-      $( this ).data("timestamp", timestamp);
-      $( this ).removeAttr('data-selected');
+      $(this).data("timestamp", timestamp);
+      $(this).removeAttr('data-selected');
 
     });
   }
@@ -179,16 +182,18 @@
     //  Click on time slot
     //=================================
     this.$el.on('click', '.time-slot', function () {
-      var day = $(this).data('day');
-      if (!plugin.isSelecting()) {  // if we are not in selecting mode
-        if (isSlotSelected($(this))) {
-          plugin.deselect($(this));
-        }
-        else {  // then start selecting
-          plugin.$selectingStart = $(this);
-          $(this).attr('data-selected', 'selected');
-          plugin.$el.trigger('select.timeslot.weekScheduler', $(this).data("timestamp"));
-          plugin.$selectingStart = null;
+      if (!$(this).data('blocked')) {
+        if (!plugin.isSelecting()) {  // if we are not in selecting mode
+          if (isSlotSelected($(this))) {
+            plugin.deselect($(this));
+            plugin.$el.trigger('select.timeslot.weekScheduler', $(this).data("timestamp"));
+          }
+          else {  // then start selecting
+            plugin.$selectingStart = $(this);
+            $(this).attr('data-selected', 'selected');
+            plugin.$el.trigger('select.timeslot.weekScheduler', $(this).data("timestamp"));
+            plugin.$selectingStart = null;
+          }
         }
       }
     });
@@ -270,7 +275,7 @@
    * @private
    */
   function timeDiff(start, end) {   // time in HH:mm format
-                                    // need a dummy date to utilize the Date object
+    // need a dummy date to utilize the Date object
     return (new Date(2000, 0, 1, end.split(':')[0], end.split(':')[1]).getTime() -
       new Date(2000, 0, 1, start.split(':')[0], start.split(':')[1]).getTime()) / 60000;
   }
