@@ -12,17 +12,17 @@
   }
 
   WeekScheduler.DEFAULTS = {
-    days        : [0, 1, 2, 3, 4, 5, 6],  // Sun - Sat
-    startTime   : '08:00',                // HH:mm format
-    endTime     : '20:00',                // HH:mm format
-    interval    : 30,                     // minutes
-    stringDays  : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-    template    : '<div class="day-schedule-selector">'         +
-    '<div class="week-selector"></div>'            +
-    '<table class="schedule-table">'               +
-    '<thead class="schedule-header"></thead>'      +
-    '<tbody class="schedule-rows"></tbody>'        +
-    '</table>'                                     +
+    days: [0, 1, 2, 3, 4, 5, 6],  // Sun - Sat
+    startTime: '08:00',                // HH:mm format
+    endTime: '20:00',                // HH:mm format
+    interval: 30,                     // minutes
+    stringDays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    template: '<div class="day-schedule-selector">' +
+    '<div class="week-selector"></div>' +
+    '<table class="schedule-table">' +
+    '<thead class="schedule-header"></thead>' +
+    '<tbody class="schedule-rows"></tbody>' +
+    '</table>' +
     '<div>'
   };
 
@@ -51,7 +51,7 @@
     var lastday = this.lastDayWeek;
 
     var html = '<div class="week-selector-text">' + firstday.getDate() + " " + firstday.getMonthName() + " - "
-        + lastday.getDate() + " " + lastday.getMonthName() + '</div>';
+      + lastday.getDate() + " " + lastday.getMonthName() + '</div>';
 
     this.$el.find('.week-selector').html('<div class="left-arrow arrow"> < </div> '
       + html + ' <div class="right-arrow arrow"> > </div>');
@@ -62,11 +62,13 @@
    * @public
    */
   WeekScheduler.prototype.renderHeader = function () {
-    var stringDays = this.options.stringDays
-      , days = this.options.days
-      , html = '';
+    var stringDays = this.options.stringDays,
+      days = this.options.days,
+      html = '';
 
-    $.each(days, function (i, _) { html += '<th>' + (stringDays[i] || '') + '</th>'; });
+    $.each(days, function (i, _) {
+      html += '<th>' + (stringDays[i] || '') + '</th>';
+    });
     this.$el.find('.schedule-header').html('<tr><th></th>' + html + '</tr>');
   };
 
@@ -75,15 +77,22 @@
    * @public
    */
   WeekScheduler.prototype.renderRows = function () {
-    var start = this.options.startTime
-      , end = this.options.endTime
-      , interval = this.options.interval
-      , days = this.options.days
-      , $el = this.$el.find('.schedule-rows');
+    var start = this.options.startTime,
+      end = this.options.endTime,
+      interval = this.options.interval,
+      days = this.options.days,
+      $el = this.$el.find('.schedule-rows'),
+      firstDayWeek = this.firstDayWeek;
 
     $.each(generateDates(start, end, interval), function (i, d) {
       var daysInARow = $.map(new Array(days.length), function (_, i) {
-        return '<td class="time-slot" data-time="' + hhmm(d) + '" data-day="' + days[i] + '"></td>'
+
+        var hour = hhmm(d);
+        hour = hour.split(":");
+        var dateAux = new Date(firstDayWeek.getTime() + i * 24 * 60 * 60 * 1000);
+        var date = new Date(dateAux.getFullYear(), dateAux.getMonth(), dateAux.getDate(), hour[0], hour[1], 0, 0);
+
+        return '<td class="time-slot" data-timestamp="' + date.getTime() + '"></td>'
       }).join();
 
       $el.append('<tr><td class="time-label">' + hmmAmPm(d) + '</td>' + daysInARow + '</tr>');
@@ -127,9 +136,13 @@
    * Remove selected attribute to time slot
    * @public
    */
-  WeekScheduler.prototype.deselect = function ($slot) { $slot.removeAttr('data-selected'); }
+  WeekScheduler.prototype.deselect = function ($slot) {
+    $slot.removeAttr('data-selected');
+  }
 
-  function isSlotSelected($slot) { return $slot.is('[data-selected]'); }
+  function isSlotSelected($slot) {
+    return $slot.is('[data-selected]');
+  }
 
   //=================================================================================================================
   //                                            Manage Events
@@ -152,16 +165,7 @@
         else {  // then start selecting
           plugin.$selectingStart = $(this);
           $(this).attr('data-selected', 'selected');
-          plugin.$el.trigger('selected.artsy.dayScheduleSelector', [getSelection(plugin, plugin.$selectingStart, $(this))]);
-          plugin.$selectingStart = null;
-        }
-      } else {  // if we are in selecting mode
-        if (day == plugin.$selectingStart.data('day')) {  // if clicking on the same day column
-          // then end of selection
-          plugin.$el.find('.time-slot[data-day="' + day + '"]').filter('[data-selecting]')
-            .attr('data-selected', 'selected').removeAttr('data-selecting');
-          plugin.$el.find('.time-slot').removeAttr('data-disabled');
-          plugin.$el.trigger('selected.artsy.dayScheduleSelector', [getSelection(plugin, plugin.$selectingStart, $(this))]);
+          plugin.$el.trigger('selected.artsy.dayScheduleSelector', $(this).data("timestamp"));
           plugin.$selectingStart = null;
         }
       }
@@ -174,7 +178,7 @@
       var lastDayWeek = new Date(plugin.firstDayWeek.getTime() + 6 * 24 * 60 * 60 * 1000);
 
       plugin.$el.find('.week-selector-text').html(plugin.firstDayWeek.getDate()
-        + " " + plugin.firstDayWeek.getMonthName() + " - "  + lastDayWeek.getDate()
+        + " " + plugin.firstDayWeek.getMonthName() + " - " + lastDayWeek.getDate()
         + " " + lastDayWeek.getMonthName());
 
       plugin.updateActualWeekDays(plugin.firstDayWeek, lastDayWeek);
@@ -189,7 +193,7 @@
       var lastDayWeek = new Date(plugin.firstDayWeek.getTime() + 6 * 24 * 60 * 60 * 1000);
 
       plugin.$el.find('.week-selector-text').html(plugin.firstDayWeek.getDate()
-        + " " + plugin.firstDayWeek.getMonthName() + " - "  + lastDayWeek.getDate()
+        + " " + plugin.firstDayWeek.getMonthName() + " - " + lastDayWeek.getDate()
         + " " + lastDayWeek.getMonthName());
 
       plugin.updateActualWeekDays(plugin.firstDayWeek, lastDayWeek);
@@ -204,10 +208,10 @@
   //=================================================================================================================
 
   function Plugin(option) {
-    return this.each(function (){
-      var $this   = $(this)
-        , data    = $this.data('artsy.dayScheduleSelector')
-        , options = typeof option == 'object' && option;
+    return this.each(function () {
+      var $this = $(this),
+        data = $this.data('artsy.dayScheduleSelector'),
+        options = typeof option == 'object' && option;
 
       if (!data) {
         $this.data('artsy.dayScheduleSelector', (data = new WeekScheduler(this, options)));
@@ -253,9 +257,9 @@
    * @returns {String} Time in H:mm format with am/pm, e.g. '9:30am'
    */
   function hmmAmPm(date) {
-    var hours = date.getHours()
-      , minutes = date.getMinutes()
-      , ampm = hours >= 12 ? 'pm' : 'am';
+    var hours = date.getHours(),
+      minutes = date.getMinutes(),
+      ampm = hours >= 12 ? 'pm' : 'am';
     return hours + ':' + ('0' + minutes).slice(-2) + ampm;
   }
 
@@ -265,14 +269,14 @@
    * @returns {String} Time in HH:mm format, e.g. '09:30'
    */
   function hhmm(date) {
-    var hours = date.getHours()
-      , minutes = date.getMinutes();
+    var hours = date.getHours(),
+      minutes = date.getMinutes();
     return ('0' + hours).slice(-2) + ':' + ('0' + minutes).slice(-2);
   }
 
   function hhmmToSecondsSinceMidnight(hhmm) {
-    var h = hhmm.split(':')[0]
-      , m = hhmm.split(':')[1];
+    var h = hhmm.split(':')[0],
+      m = hhmm.split(':')[1];
     return parseInt(h, 10) * 60 * 60 + parseInt(m, 10) * 60;
   }
 
@@ -299,7 +303,7 @@
   /**
    * Get full name of the month
    */
-  Date.prototype.getMonthName = function() {
+  Date.prototype.getMonthName = function () {
     return this.monthNames[this.getMonth()];
   };
 
