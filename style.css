@@ -1,3 +1,6 @@
+.schedule-table{
+  clear: both;
+}
 
 .schedule-rows td {
   width: 80px;
@@ -12,7 +15,6 @@
   background-color: transparent;
   text-align: right;
   position: relative;
-  top: -12px;
 }
 
 .schedule-rows td[data-selected],
@@ -22,4 +24,21 @@
 
 .week-selector{
   text-align: center;
+  height: 60px;
+  margin-bottom: 40px;
+}
+
+.week-selector{
+  font-size: 50px;
+}
+
+.week-selector .arrow{
+  float: left;
+  width: 5%;
+  cursor: pointer;
+}
+
+.week-selector-text{
+  width: 30%;
+  float: left;
 }

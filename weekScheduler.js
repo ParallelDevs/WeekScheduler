@@ -7,6 +7,8 @@
     this.render();
     this.attachEvents();
     this.$selectingStart = null;
+    this.firstDayWeek = null;
+    this.lastDayWeek = null;
   }
 
   WeekScheduler.DEFAULTS = {
@@ -34,6 +36,7 @@
    */
   WeekScheduler.prototype.render = function () {
     this.$el.html(this.options.template);
+    this.setActualWeekDays()
     this.renderWeekSelector();
     this.renderHeader();
     this.renderRows();
@@ -44,16 +47,14 @@
    * @public
    */
   WeekScheduler.prototype.renderWeekSelector = function () {
-    var curr = new Date; // get current date
-    var first = curr.getDate() - curr.getDay(); // First day is the day of the month - the day of the week
-    var firstday = new Date(curr.setDate(first));
-    var lastday = new Date(firstday.getTime() + 6 * 24 * 60 * 60 * 1000);
+    var firstday = this.firstDayWeek;
+    var lastday = this.lastDayWeek;
 
+    var html = '<div class="week-selector-text">' + firstday.getDate() + " " + firstday.getMonthName() + " - "
+        + lastday.getDate() + " " + lastday.getMonthName() + '</div>';
 
-    var html = '<h1>' + firstday.getDate() + " " + firstday.getMonthName() + " - "
-        + lastday.getDate() + " " + lastday.getMonthName() + '</h1>';
-
-    this.$el.find('.week-selector').html('<h1>' + html + '</h1>');
+    this.$el.find('.week-selector').html('<div class="left-arrow arrow"> < </div> '
+      + html + ' <div class="right-arrow arrow"> > </div>');
   };
 
   /**
@@ -93,6 +94,27 @@
   //                                            Functions
   //=================================================================================================================
 
+
+  /**
+   * Is the day schedule selector in selecting mode?
+   * @public
+   */
+  WeekScheduler.prototype.setActualWeekDays = function () {
+    var curr = new Date; // get current date
+    var first = curr.getDate() - curr.getDay(); // First day is the day of the month - the day of the week
+    this.firstDayWeek = new Date(curr.setDate(first));
+    this.lastDayWeek = new Date(this.firstDayWeek.getTime() + 6 * 24 * 60 * 60 * 1000);
+  }
+
+  /**
+   * Is the day schedule selector in selecting mode?
+   * @public
+   */
+  WeekScheduler.prototype.updateActualWeekDays = function (firstDay, lastDay) {
+    this.firstDayWeek = firstDay;
+    this.lastDayWeek = lastDay;
+  }
+
   /**
    * Is the day schedule selector in selecting mode?
    * @public
@@ -114,9 +136,10 @@
   //=================================================================================================================
 
   WeekScheduler.prototype.attachEvents = function () {
-    var plugin = this
-      , options = this.options
-      , $slots;
+    var plugin = this,
+      options = this.options,
+      firstDayWeek = this.firstDayWeek,
+      $slots;
 
     //  Click on time slot
     //=================================
@@ -143,6 +166,36 @@
         }
       }
     });
+
+    //  Click left arrow
+    //=================================
+    this.$el.on('click', '.left-arrow', function () {
+      plugin.firstDayWeek = new Date(firstDayWeek.getTime() - 7 * 24 * 60 * 60 * 1000);
+      var lastDayWeek = new Date(plugin.firstDayWeek.getTime() + 6 * 24 * 60 * 60 * 1000);
+
+      plugin.$el.find('.week-selector-text').html(plugin.firstDayWeek.getDate()
+        + " " + plugin.firstDayWeek.getMonthName() + " - "  + lastDayWeek.getDate()
+        + " " + lastDayWeek.getMonthName());
+
+      plugin.updateActualWeekDays(plugin.firstDayWeek, lastDayWeek);
+      firstDayWeek = plugin.firstDayWeek;
+    });
+
+    //  Click right arrow
+    //=================================
+    this.$el.on('click', '.right-arrow', function () {
+
+      plugin.firstDayWeek = new Date(firstDayWeek.getTime() + 7 * 24 * 60 * 60 * 1000);
+      var lastDayWeek = new Date(plugin.firstDayWeek.getTime() + 6 * 24 * 60 * 60 * 1000);
+
+      plugin.$el.find('.week-selector-text').html(plugin.firstDayWeek.getDate()
+        + " " + plugin.firstDayWeek.getMonthName() + " - "  + lastDayWeek.getDate()
+        + " " + lastDayWeek.getMonthName());
+
+      plugin.updateActualWeekDays(plugin.firstDayWeek, lastDayWeek);
+      firstDayWeek = plugin.firstDayWeek;
+    });
+
 
   };
 
