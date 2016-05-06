@@ -144,6 +144,28 @@
     return $slot.is('[data-selected]');
   }
 
+  /**
+   * Update the timestamp in all timeslot
+   * @public
+   */
+  WeekScheduler.prototype.updateTimeslot = function (arrow) {
+    this.$el.find(".time-slot").each(function( index ) {
+
+      var timestamp = parseInt($( this ).data("timestamp"));
+
+      if(arrow === "left"){
+        timestamp -= 7 * 24 * 60 * 60 * 1000
+      }else{
+        timestamp += 7 * 24 * 60 * 60 * 1000
+      }
+
+      $( this ).data("timestamp", timestamp);
+      $( this ).removeAttr('data-selected');
+
+    });
+  }
+
+
   //=================================================================================================================
   //                                            Manage Events
   //=================================================================================================================
@@ -165,7 +187,7 @@
         else {  // then start selecting
           plugin.$selectingStart = $(this);
           $(this).attr('data-selected', 'selected');
-          plugin.$el.trigger('selected.artsy.dayScheduleSelector', $(this).data("timestamp"));
+          plugin.$el.trigger('select.timeslot.weekScheduler', $(this).data("timestamp"));
           plugin.$selectingStart = null;
         }
       }
@@ -183,6 +205,7 @@
 
       plugin.updateActualWeekDays(plugin.firstDayWeek, lastDayWeek);
       firstDayWeek = plugin.firstDayWeek;
+      plugin.updateTimeslot("left");
     });
 
     //  Click right arrow
@@ -198,6 +221,7 @@
 
       plugin.updateActualWeekDays(plugin.firstDayWeek, lastDayWeek);
       firstDayWeek = plugin.firstDayWeek;
+      plugin.updateTimeslot("right");
     });
 
 
