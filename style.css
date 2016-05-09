@@ -1,26 +1,51 @@
+/***************************************************************/
+/**                       Table styles                        **/
+/***************************************************************/
 .schedule-table{
   clear: both;
 }
 
-.schedule-rows td {
-  width: 80px;
+.schedule-rows div.row,
+.schedule-header div.row{
+  width: 100%;
+  display: flex;
+}
+
+.schedule-rows .row div,
+.schedule-header .row div{
+  width: 14%;
   height: 30px;
   margin: 3px;
   padding: 5px;
+}
+
+.schedule-rows div.time-slot{
   background-color: #3498DB;
   cursor: pointer;
 }
 
-.schedule-rows td:first-child {
+.schedule-header div.day-label{
+  text-align: center;
+}
+
+.schedule-header div.day-label:first-child{
+  width: 4%;
+}
+
+.schedule-rows div.time-label {
   background-color: transparent;
   text-align: right;
   position: relative;
+  width: 4%;
 }
 
-.schedule-rows td[data-selected],
-.schedule-rows td[data-selecting] { background-color: #E74C3C; }
+/***************************************************************/
+/**                       Select styles                       **/
+/***************************************************************/
+.schedule-rows div[data-selected],
+.schedule-rows div[data-selecting] { background-color: #E74C3C; }
 
-.schedule-rows td[data-disabled] { opacity: 0.55; }
+.schedule-rows div[data-disabled] { opacity: 0.55; }
 
 .time-slot[data-blocked="true"]{
   opacity: 0.5;
@@ -28,6 +53,9 @@
   pointer-events: none;
 }
 
+/***************************************************************/
+/**                  week selector styles                     **/
+/***************************************************************/
 .week-selector{
   text-align: center;
   height: 60px;
@@ -40,11 +68,12 @@
 
 .week-selector .arrow{
   float: left;
-  width: 5%;
+  width: 25%;
   cursor: pointer;
+  text-align: center;
 }
 
 .week-selector-text{
-  width: 30%;
+  width: 50%;
   float: left;
 }

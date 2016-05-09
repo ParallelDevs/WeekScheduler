@@ -14,16 +14,16 @@
   WeekScheduler.DEFAULTS = {
     days: [0, 1, 2, 3, 4, 5, 6],  // Sun - Sat
     blokedDays: [],
-    startTime: '08:00',                // HH:mm format
-    endTime: '20:00',                // HH:mm format
+    startTime: '00:00',                // HH:mm format
+    endTime: '24:00',                // HH:mm format
     interval: 30,                     // minutes
     stringDays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
     template: '<div class="day-schedule-selector">' +
     '<div class="week-selector"></div>' +
-    '<table class="schedule-table">' +
-    '<thead class="schedule-header"></thead>' +
-    '<tbody class="schedule-rows"></tbody>' +
-    '</table>' +
+    '<div class="schedule-table">' +
+    '<div class="schedule-header"></div>' +
+    '<div class="schedule-rows"></div>' +
+    '</div>' +
     '<div>'
   };
 
@@ -68,9 +68,9 @@
       html = '';
 
     $.each(days, function (i, _) {
-      html += '<th>' + (stringDays[i] || '') + '</th>';
+      html += '<div class="day-label">' + (stringDays[i] || '') + '</div>';
     });
-    this.$el.find('.schedule-header').html('<tr><th></th>' + html + '</tr>');
+    this.$el.find('.schedule-header').html('<div class="row"><div class="day-label"></div>' + html + '</div>');
   };
 
   /**
@@ -86,19 +86,23 @@
       $el = this.$el.find('.schedule-rows'),
       firstDayWeek = this.firstDayWeek;
 
-    $.each(generateDates(start, end, interval), function (i, d) {
-      var daysInARow = $.map(new Array(days.length), function (_, i) {
+    var a = generateDates(start, end, interval);
 
+    $.each(generateDates(start, end, interval), function (i, d) {
+
+      var daysInARow = '';
+
+      for (var j = 0; j < days.length; j++) {
         var hour = hhmm(d);
         hour = hour.split(":");
-        var dateAux = new Date(firstDayWeek.getTime() + i * 24 * 60 * 60 * 1000);
+        var dateAux = new Date(firstDayWeek.getTime() + j * 24 * 60 * 60 * 1000);
         var date = new Date(dateAux.getFullYear(), dateAux.getMonth(), dateAux.getDate(), hour[0], hour[1], 0, 0);
-        var blocked = jQuery.inArray(i, blokedDays) == -1 ? false : true;
+        var blocked = jQuery.inArray(j, blokedDays) == -1 ? false : true;
 
-        return '<td class="time-slot" data-blocked="' + blocked + '" data-timestamp="' + date.getTime() + '"></td>'
-      }).join();
+        daysInARow += '<div class="time-slot" data-blocked="' + blocked + '" data-timestamp="' + date.getTime() + '"></div>';
+      }
 
-      $el.append('<tr><td class="time-label">' + hmmAmPm(d) + '</td>' + daysInARow + '</tr>');
+      $el.append('<div class="row"><div class="time-label">' + hmmAmPm(d) + '</div>' + daysInARow + '</div>');
     });
   };
 
