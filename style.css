@@ -8,6 +8,10 @@
 .schedule-rows div.row,
 .schedule-header div.row{
   width: 100%;
+  display: -webkit-box;      /* OLD - iOS 6-, Safari 3.1-6 */
+  display: -moz-box;         /* OLD - Firefox 19- (buggy but mostly works) */
+  display: -ms-flexbox;      /* TWEENER - IE 10 */
+  display: -webkit-flex;     /* NEW - Chrome */
   display: flex;
 }
 
@@ -29,14 +33,18 @@
 }
 
 .schedule-header div.day-label:first-child{
-  width: 4%;
+  width: 8%;
+  padding: 6px;
+  text-align: center;
 }
 
 .schedule-rows div.time-label {
   background-color: transparent;
   text-align: right;
   position: relative;
-  width: 4%;
+  width: 8%;
+  padding: 6px;
+  text-align: center;
 }
 
 /***************************************************************/
@@ -76,4 +84,13 @@
 .week-selector-text{
   width: 50%;
   float: left;
+}
+
+@media screen and (max-width: 600px) and (min-width: 320px) {
+  .schedule-rows div.time-label {
+    width: 50%;
+  }
+  .schedule-rows .row div, .schedule-header .row div {
+    width: 50%;
+  }
 }
