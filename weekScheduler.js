@@ -144,8 +144,8 @@
   WeekScheduler.prototype.updateActualWeekDays = function (firstDay, lastDay) {
     this.firstDayWeek = firstDay;
     this.lastDayWeek = lastDay;
-    $('#firstDayWeek').val(firstDay.getTime());
-    $('#lastDayWeek').val(lastDay.getTime());
+    $('#firstDayWeek').val((firstDay == undefined) ? firstDay : firstDay.getTime());
+    $('#lastDayWeek').val((lastDay == undefined) ? firstDay : lastDay.getTime());
   }
 
   /**
