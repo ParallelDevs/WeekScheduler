@@ -51,6 +51,9 @@
   WeekScheduler.prototype.renderWeekSelector = function () {
     var firstday = this.firstDayWeek;
     var lastday = this.lastDayWeek;
+    var hiddenInputs =
+      '<input type="hidden" id="firstDayWeek" value="' + firstday.getTime() + '">' +
+      '<input type="hidden" id="lastDayWeek" value="' + lastday.getTime() + '">';
 
     // html in mobile
     if (this.mobile) {
@@ -64,7 +67,7 @@
     }
 
     this.$el.find('.week-selector').html('<div class="left arrow"> < </div> '
-      + html + ' <div class="right arrow"> > </div>');
+      + html + ' <div class="right arrow"> > </div>' + hiddenInputs);
   };
 
   /**
@@ -141,6 +144,8 @@
   WeekScheduler.prototype.updateActualWeekDays = function (firstDay, lastDay) {
     this.firstDayWeek = firstDay;
     this.lastDayWeek = lastDay;
+    $('#firstDayWeek').val(firstDay.getTime());
+    $('#lastDayWeek').val(lastDay.getTime());
   }
 
   /**
@@ -216,6 +221,7 @@
   WeekScheduler.prototype.attachEvents = function () {
     var plugin = this,
       firstDayWeek = this.firstDayWeek,
+      lastDayWeek = this.lastDayWeek,
       mobile = this.mobile;
 
     // Window resize
@@ -243,12 +249,18 @@
         if (!plugin.isSelecting()) {  // if we are not in selecting mode
           if (isSlotSelected($(this))) {
             plugin.deselect($(this));
-            plugin.$el.trigger('select.timeslot.weekScheduler', $(this).data("timestamp"));
+            plugin.$el.trigger('select.timeslot.weekScheduler',
+              {timestamp : $(this).data("timestamp"),
+                firstDayWeek : $('#firstDayWeek').val(),
+                lastDayWeek : $('#lastDayWeek').val()});
           }
           else {  // then start selecting
             plugin.$selectingStart = $(this);
             $(this).attr('data-selected', 'selected');
-            plugin.$el.trigger('select.timeslot.weekScheduler', $(this).data("timestamp"));
+            plugin.$el.trigger('select.timeslot.weekScheduler',
+              {timestamp : $(this).data("timestamp"),
+                firstDayWeek : $('#firstDayWeek').val(),
+                lastDayWeek : $('#lastDayWeek').val()});
             plugin.$selectingStart = null;
           }
         }
